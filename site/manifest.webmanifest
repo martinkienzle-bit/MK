@@ -1,0 +1,20 @@
+{
+  "id": "./",
+  "name": "SpaWater – Wasserpflege",
+  "short_name": "SpaWater",
+  "description": "Offline-Wasserpflegejournal für deinen Whirlpool",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f1f7f7",
+  "theme_color": "#087f8c",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
