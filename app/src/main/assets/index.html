@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#087f8c">
+<title>SpaWater</title>
+<style>
+:root{font-family:system-ui,-apple-system,sans-serif;color:#17313a;background:#f1f8f8}*{box-sizing:border-box}body{margin:0}header{background:#087f8c;color:white;padding:24px 18px 28px;border-radius:0 0 24px 24px}h1{margin:0;font-size:28px}header p{margin:6px 0 0;opacity:.9}.wrap{padding:16px;max-width:700px;margin:auto}.card{background:white;border-radius:18px;padding:18px;margin:12px 0;box-shadow:0 3px 16px #0c525a0c}h2{font-size:18px;margin:0 0 14px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}label{display:block;font-size:13px;color:#547078;margin-bottom:5px}input,textarea{width:100%;padding:12px;border:1px solid #cfdfdf;border-radius:10px;font:inherit;background:#fbfefe}textarea{min-height:70px}button{background:#087f8c;color:white;border:0;border-radius:12px;padding:12px 16px;font:inherit;font-weight:650;cursor:pointer;margin-top:10px}.muted{color:#648087;font-size:13px}.task{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #e4eeee;padding:12px 0}.task:last-child{border:0}.tag{background:#e3f5f4;color:#087f8c;border-radius:8px;padding:5px 8px;font-size:12px}.entry{padding:10px 0;border-bottom:1px solid #e4eeee;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<header><h1>SpaWater</h1><p>Dein Whirlpool. Deine Wasserwerte. Lokal gespeichert.</p></header>
+<main class="wrap">
+<section class="card"><h2>Wasserwerte eintragen</h2><div class="grid">
+<div><label for="ph">pH-Wert</label><input id="ph" type="number" step=".1" placeholder="z. B. 7,4"></div>
+<div><label for="br">Brom (mg/l)</label><input id="br" type="number" step=".1" placeholder="Messwert"></div>
+<div><label for="alk">Alkalinität (mg/l)</label><input id="alk" type="number" placeholder="Messwert"></div>
+<div><label for="temp">Wassertemperatur (°C)</label><input id="temp" type="number" step=".5" placeholder="z. B. 37"></div>
+</div><p><label for="notes">Notizen</label><textarea id="notes" placeholder="Pflege, Auffälligkeiten ..."></textarea></p><button onclick="saveReading()">Messung speichern</button><p class="muted">Die Daten werden nur lokal auf diesem Gerät gespeichert.</p></section>
+<section class="card"><h2>Pflegeplan</h2>
+<div class="task"><div><b>Aqua Finesse</b><div class="muted">Wöchentlich · Dosierung nach Herstellerangabe</div></div><span class="tag">7 Tage</span></div>
+<div class="task"><div><b>Brom kontrollieren / nachdosieren</b><div class="muted">Messwerte und Produktetikett beachten</div></div><span class="tag">14 Tage</span></div>
+<div class="task"><div><b>Wasserwechsel</b><div class="muted">Richtwert; Wasserzustand und Nutzung beachten</div></div><span class="tag">6 Monate</span></div>
+<div id="lastCare" class="muted">Erledigungen bitte mit Datum in den Notizen dokumentieren.</div></section>
+<section class="card"><h2>Messverlauf</h2><div id="history" class="muted">Noch keine Messungen gespeichert.</div><button onclick="exportData()">Daten exportieren</button> <button onclick="clearHistory()" style="background:#e8f1f1;color:#234">Verlauf löschen</button></section>
+</main>
+<script>
+const key='spawater_readings_v1';
+function readings(){try{return JSON.parse(localStorage.getItem(key)||'[]')}catch(e){return []}}
+function saveReading(){const r={date:new Date().toLocaleString('de-DE'),ph:document.querySelector('#ph').value,br:document.querySelector('#br').value,alk:document.querySelector('#alk').value,temp:document.querySelector('#temp').value,notes:document.querySelector('#notes').value};if(!r.ph&&!r.br&&!r.alk&&!r.temp){alert('Bitte mindestens einen Wasserwert eintragen.');return}const a=readings();a.unshift(r);localStorage.setItem(key,JSON.stringify(a));['ph','br','alk','temp','notes'].forEach(id=>document.getElementById(id).value='');render();alert('Messung lokal gespeichert.')}
+function render(){const a=readings();const h=document.getElementById('history');if(!a.length){h.textContent='Noch keine Messungen gespeichert.';return}h.innerHTML=a.map(r=>'<div class="entry"><b>'+esc(r.date)+'</b><br>pH: '+esc(r.ph||'–')+' · Brom: '+esc(r.br||'–')+' mg/l · Alkalinität: '+esc(r.alk||'–')+' mg/l · Temperatur: '+esc(r.temp||'–')+' °C'+(r.notes?'<br>'+esc(r.notes):'')+'</div>').join('')}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function exportData(){const b=new Blob([JSON.stringify(readings(),null,2)],{type:'application/json'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='spawater-messverlauf.json';a.click();URL.revokeObjectURL(u)}
+function clearHistory(){if(confirm('Wirklich alle Messungen löschen?')){localStorage.removeItem(key);render()}}
+render();
+</script>
+</body></html>
